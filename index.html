@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calisthenics Progress & Workout Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #00adb5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: none;
+            box-sizing: border-box;
+        }
+        input, select {
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+        button {
+            background-color: #00adb5;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #00888e;
+        }
+        .log-item {
+            background: #2a2a2a;
+            padding: 10px;
+            margin-top: 8px;
+            border-left: 4px solid #00adb5;
+            border-radius: 4px;
+        }
+        .level-tag {
+            font-weight: bold;
+            color: #ff2e63;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🤸‍♂️ Workout Tracker & Progress</h1>
+
+    <!-- SECTION 1: LEVEL COMPARISON -->
+    <div class="card">
+        <h2>📊 Level Progress Tracker</h2>
+        <label>Skill Name (e.g., Planche, Handstand):</label>
+        <input type="text" id="skillName" placeholder="Jaise: Handstand Hold">
+        
+        <label>Pehle ka Level (Past Level):</label>
+        <input type="text" id="pastLevel" placeholder="Jaise: Wall Hold - 10 Sec">
+        
+        <label>Abhi ka Level (Current Level):</label>
+        <input type="text" id="currentLevel" placeholder="Jaise: Free Hold - 25 Sec">
+
+        <button onclick="saveSkillLevel()">Save Level Progress</button>
+
+        <div id="skillList"></div>
+    </div>
+
+    <!-- SECTION 2: DAILY WORKOUT LOG -->
+    <div class="card">
+        <h2>📝 Daily Workout Log</h2>
+        <input type="date" id="workoutDate">
+        <input type="text" id="exerciseName" placeholder="Exercise (e.g., Push-ups, Tuck Planche)">
+        <input type="number" id="setsReps" placeholder="Sets / Reps / Hold Time (e.g. 3 sets x 12 reps)">
+
+        <button onclick="addWorkoutLog()">Log Workout</button>
+
+        <div id="workoutHistory"></div>
+    </div>
+</div>
+
+<script>
+    // Load existing data when app opens
+    window.onload = function() {
+        displaySkillLevels();
+        displayWorkoutHistory();
+        document.getElementById('workoutDate').valueAsDate = new Date();
+    };
+
+    // 1. Save Skill Progression Level
+    function saveSkillLevel() {
+        let name = document.getElementById('skillName').value;
+        let past = document.getElementById('pastLevel').value;
+        let current = document.getElementById('currentLevel').value;
+
+        if(!name || !past || !current) {
+            alert("Kripya saari details bharein!");
+            return;
+        }
+
+        let skills = JSON.parse(localStorage.getItem('cali_skills')) || [];
+        skills.push({ name, past, current, date: new Date().toLocaleDateString() });
+        localStorage.setItem('cali_skills', JSON.stringify(skills));
+
+        document.getElementById('skillName').value = '';
+        document.getElementById('pastLevel').value = '';
+        document.getElementById('currentLevel').value = '';
+
+        displaySkillLevels();
+    }
+
+    function displaySkillLevels() {
+        let skills = JSON.parse(localStorage.getItem('cali_skills')) || [];
+        let listDiv = document.getElementById('skillList');
+        listDiv.innerHTML = "<h3>Level History:</h3>";
+
+        skills.forEach((s, index) => {
+            listDiv.innerHTML += `
+                <div class="log-item">
+                    <strong>${s.name}</strong> (${s.date})<br>
+                    🔻 Pehle: <span class="level-tag">${s.past}</span><br>
+                    🚀 Abhi: <span style="color:#00adb5; font-weight:bold">${s.current}</span>
+                </div>
+            `;
+        });
+    }
+
+    // 2. Save Daily Workout Log
+    function addWorkoutLog() {
+        let date = document.getElementById('workoutDate').value;
+        let exercise = document.getElementById('exerciseName').value;
+        let details = document.getElementById('setsReps').value;
+
+        if(!date || !exercise || !details) {
+            alert("Sari details bharein!");
+            return;
+        }
+
+        let workouts = JSON.parse(localStorage.getItem('cali_workouts')) || [];
+        workouts.push({ date, exercise, details });
+        localStorage.setItem('cali_workouts', JSON.stringify(workouts));
+
+        document.getElementById('exerciseName').value = '';
+        document.getElementById('setsReps').value = '';
+
+        displayWorkoutHistory();
+    }
+
+    function displayWorkoutHistory() {
+        let workouts = JSON.parse(localStorage.getItem('cali_workouts')) || [];
+        let historyDiv = document.getElementById('workoutHistory');
+        historyDiv.innerHTML = "<h3>Recent Workouts:</h3>";
+
+        // Reverse to show latest workouts first
+        workouts.slice().reverse().forEach((w) => {
+            historyDiv.innerHTML += `
+                <div class="log-item">
+                    📅 <strong>${w.date}</strong><br>
+                    🏋️ <strong>${w.exercise}:</strong> ${w.details}
+                </div>
+            `;
+        });
+    }
+</script>
+
+</body>
+</html>
